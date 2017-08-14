@@ -59,7 +59,7 @@ class BankOfCordaWebApi(val rpc: CordaRPCOps) {
         // The line below blocks and waits for the future to resolve.
         return try {
             rpc.startFlow(::CashIssueFlow, amount, issuerBankPartyRef, notaryNode.notaryIdentity).returnValue.getOrThrow()
-            rpc.startFlow(::CashPaymentFlow, amount, issueToParty, params.anonymous)
+            rpc.startFlow(CashPaymentFlow::Initiate, amount, issueToParty, params.anonymous)
                     .returnValue.getOrThrow().stx
             logger.info("Issue request completed successfully: $params")
             Response.status(Response.Status.CREATED).build()

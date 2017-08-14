@@ -23,7 +23,7 @@ class BankOfCordaRPCClientTest {
         driver(dsl = {
             val bocManager = User("bocManager", "password1", permissions = setOf(
                     startFlowPermission<CashIssueFlow>(),
-                    startFlowPermission<CashPaymentFlow>()))
+                    startFlowPermission<CashPaymentFlow.Initiate>()))
             val bigCorpCFO = User("bigCorpCFO", "password2", permissions = emptySet())
             val (nodeBankOfCorda, nodeBigCorporation) = listOf(
                     startNode(BOC.name, setOf(ServiceInfo(SimpleNotaryService.type)), listOf(bocManager)),
@@ -53,7 +53,7 @@ class BankOfCordaRPCClientTest {
                     BIG_CORP_PARTY_REF,
                     nodeBankOfCorda.nodeInfo.notaryIdentity).returnValue.getOrThrow()
             bocProxy.startFlow(
-                    ::CashPaymentFlow,
+                    CashPaymentFlow::Initiate,
                     1000.DOLLARS,
                     nodeBigCorporation.nodeInfo.legalIdentity,
                     anonymous).returnValue.getOrThrow()

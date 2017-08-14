@@ -51,7 +51,7 @@ class BankOfCordaClientApi(val hostAndPort: NetworkHostAndPort) {
 
             rpc.startFlow(::CashIssueFlow, amount, issuerBankPartyRef, notaryNode.notaryIdentity)
                     .returnValue.getOrThrow().stx
-            return rpc.startFlow(::CashPaymentFlow, amount, issueToParty, params.anonymous)
+            return rpc.startFlow(CashPaymentFlow::Initiate, amount, issueToParty, params.anonymous)
                     .returnValue.getOrThrow().stx
         }
     }
