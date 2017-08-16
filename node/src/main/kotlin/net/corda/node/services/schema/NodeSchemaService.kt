@@ -14,6 +14,7 @@ import net.corda.node.services.persistence.DBCheckpointStorage
 import net.corda.node.services.persistence.DBTransactionMappingStorage
 import net.corda.node.services.persistence.DBTransactionStorage
 import net.corda.node.services.transactions.PersistentUniquenessProvider
+import net.corda.node.services.transactions.RaftUniquenessProvider
 import net.corda.node.services.vault.VaultSchemaV1
 import net.corda.schemas.CashSchemaV1
 
@@ -35,8 +36,8 @@ class NodeSchemaService(customSchemas: Set<MappedSchema> = emptySet()) : SchemaS
                     DBTransactionStorage.DBTransaction::class.java,
                     DBTransactionMappingStorage.DBTransactionMapping::class.java,
                     PersistentKeyManagementService.PersistentKey::class.java,
-                    PersistentUniquenessProvider.PersistentUniqueness::class.java
-                    ))
+                    PersistentUniquenessProvider.PersistentUniqueness::class.java,
+                    RaftUniquenessProvider.RaftState::class.java))
 
     // Required schemas are those used by internal Corda services
     // For example, cash is used by the vault for coin selection (but will be extracted as a standalone CorDapp in future)
