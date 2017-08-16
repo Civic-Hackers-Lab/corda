@@ -763,7 +763,7 @@ abstract class AbstractNode(open val configuration: NodeConfiguration,
         override val validatedTransactions = makeTransactionStorage()
         override val transactionVerifierService by lazy { makeTransactionVerifierService() }
         override val networkMapCache by lazy { InMemoryNetworkMapCache(this) }
-        override val vaultService by lazy { NodeVaultService(this, configuration.dataSourceProperties, configuration.database) }
+        override val vaultService by lazy { NodeVaultService(this, configuration.dataSourceProperties, configuration.database, configuration.storeIrrelevantStates) }
         override val vaultQueryService by lazy {
             HibernateVaultQueryImpl(HibernateConfiguration(schemaService, configuration.database ?: Properties(), { identityService }), vaultService)
         }
@@ -806,6 +806,7 @@ abstract class AbstractNode(open val configuration: NodeConfiguration,
                 super.recordTransactions(notifyVault, txs)
             }
         }
+
         override fun jdbcSession(): Connection = database.createSession()
     }
 

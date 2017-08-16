@@ -70,5 +70,9 @@ object VaultSchema {
         /** refers to the last time a lock was taken (reserved) or updated (released, re-reserved) */
         @get:Column(name = "lock_timestamp", nullable = true)
         var lockUpdateTime: Instant?
+
+        /** relevancy of the state to the vault */
+        @get:Column(name = "is_relevant")
+        var isRelevant: Boolean
     }
 }

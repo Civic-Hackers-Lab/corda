@@ -12,6 +12,7 @@ import net.corda.core.node.services.queryBy
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.node.services.vault.Sort
 import net.corda.core.node.services.vault.builder
+import net.corda.node.services.vault.schemas.requery.VaultSchema
 import net.corda.schemas.CashSchemaV1
 import java.util.*
 import kotlin.collections.LinkedHashMap
@@ -22,6 +23,7 @@ private fun generateCashSumCriteria(currency: Currency): QueryCriteria {
 
     val ccyIndex = builder { CashSchemaV1.PersistentCashState::currency.equal(currency.currencyCode) }
     val ccyCriteria = QueryCriteria.VaultCustomQueryCriteria(ccyIndex)
+
     return sumCriteria.and(ccyCriteria)
 }
 
@@ -47,7 +49,7 @@ private fun rowsToAmount(currency: Currency, rows: Vault.Page<FungibleAsset<*>>)
 
 private fun rowsToBalances(rows: List<Any>): Map<Currency, Amount<Currency>> {
     val balances = LinkedHashMap<Currency, Amount<Currency>>()
-    for (index in 0..rows.size - 1 step 2) {
+    for (index in 0 until rows.size step 2) {
         val ccy = Currency.getInstance(rows[index + 1] as String)
         balances[ccy] = Amount(rows[index] as Long, ccy)
     }

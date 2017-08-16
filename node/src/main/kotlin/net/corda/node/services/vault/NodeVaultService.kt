@@ -58,7 +58,12 @@ import javax.persistence.criteria.Predicate
  * TODO: keep an audit trail with time stamps of previously unconsumed states "as of" a particular point in time.
  * TODO: have transaction storage do some caching.
  */
-class NodeVaultService(private val services: ServiceHub, dataSourceProperties: Properties, databaseProperties: Properties?) : SingletonSerializeAsToken(), VaultService {
+class NodeVaultService
+@JvmOverloads
+constructor(private val services: ServiceHub,
+            dataSourceProperties: Properties,
+            databaseProperties: Properties?,
+            private val storeIrrelevantStates: Boolean = false) : SingletonSerializeAsToken(), VaultService {
 
     private companion object {
         val log = loggerFor<NodeVaultService>()
@@ -69,7 +74,7 @@ class NodeVaultService(private val services: ServiceHub, dataSourceProperties: P
 
     val configuration = RequeryConfiguration(dataSourceProperties, databaseProperties = databaseProperties ?: Properties())
     val session = configuration.sessionForModel(Models.VAULT)
-    private val transactionIsolationLevel = parserTransactionIsolationLevel(databaseProperties?.getProperty("transactionIsolationLevel") ?:"")
+    private val transactionIsolationLevel = parserTransactionIsolationLevel(databaseProperties?.getProperty("transactionIsolationLevel") ?: "")
 
     private class InnerState {
         val _updatesPublisher = PublishSubject.create<Vault.Update<ContractState>>()!!
@@ -90,6 +95,7 @@ class NodeVaultService(private val services: ServiceHub, dataSourceProperties: P
             log.trace { "Removing $consumedStateRefs consumed contract states and adding $producedStateRefs produced contract states to the database." }
 
             session.withTransaction(transactionIsolationLevel) {
+                val ourKeys = services.keyManagementService.keys
                 producedStateRefsMap.forEach { it ->
                     val state = VaultStatesEntity().apply {
                         txId = it.key.txhash.toString()
@@ -99,6 +105,7 @@ class NodeVaultService(private val services: ServiceHub, dataSourceProperties: P
                         contractState = it.value.state.serialize(context = STORAGE_CONTEXT).bytes
                         notaryName = it.value.state.notary.name.toString()
                         recordedTime = services.clock.instant()
+                        isRelevant = isRelevant(it.value.state.data, ourKeys)
                     }
                     insert(state)
                 }
@@ -171,7 +178,7 @@ class NodeVaultService(private val services: ServiceHub, dataSourceProperties: P
         val ourKeys = services.keyManagementService.keys
         fun makeUpdate(tx: WireTransaction): Vault.Update<ContractState> {
             val ourNewStates = tx.outputs.
-                    filter { isRelevant(it.data, ourKeys) }.
+                    filter { storeIrrelevantStates || isRelevant(it.data, ourKeys) }.
                     map { tx.outRef<ContractState>(it.data) }
 
             // Retrieve all unconsumed states for this transaction's inputs
@@ -202,7 +209,7 @@ class NodeVaultService(private val services: ServiceHub, dataSourceProperties: P
                     zip(ltx.outputs).
                     filter {
                         (_, output) ->
-                        isRelevant(output.data, ourKeys)
+                        storeIrrelevantStates || isRelevant(output.data, ourKeys)
                     }.
                     unzip()
 
@@ -224,9 +231,10 @@ class NodeVaultService(private val services: ServiceHub, dataSourceProperties: P
         val states = HashSet<StateAndRef<ContractState>>()
         if (refs.isNotEmpty()) {
             session.withTransaction(transactionIsolationLevel) {
-                val result = select(VaultStatesEntity::class).
-                        where(stateRefCompositeColumn.`in`(stateRefArgs(refs))).
-                        and(VaultSchema.VaultStates::stateStatus eq Vault.StateStatus.UNCONSUMED)
+                val result = select(VaultStatesEntity::class)
+                        .where(stateRefCompositeColumn.`in`(stateRefArgs(refs)))
+                        .and(VaultSchema.VaultStates::stateStatus eq Vault.StateStatus.UNCONSUMED)
+                        .and(VaultSchema.VaultStates::isRelevant eq true)
                 result.get().forEach {
                     val txHash = SecureHash.parse(it.txId)
                     val index = it.index

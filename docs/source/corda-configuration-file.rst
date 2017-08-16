@@ -142,3 +142,8 @@ path to the node's base directory.
 
 :certificateSigningService: Certificate Signing Server address. It is used by the certificate signing request utility to
     obtain SSL certificate. (See :doc:`permissioning` for more information.)
+
+:storeIrrelevantStates: This flag sets the vault's irrelevant state retention policy. By default this is set to false and
+    the vault will not store irrelevant state, the relevancy of the states differ depends on ``ContractStates``'s implementation.
+    For ``OwnableState``, the state is relevant to the vault if the node owns the state, and for ``LinearState`` the relevancy
+    is computed using the ``isRelevant`` method. Please see :doc:`api-states` for more information.

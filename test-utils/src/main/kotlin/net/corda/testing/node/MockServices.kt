@@ -87,8 +87,8 @@ open class MockServices(vararg val keys: KeyPair) : ServiceHub {
 
     lateinit var hibernatePersister: HibernateObserver
 
-    fun makeVaultService(dataSourceProps: Properties, hibernateConfig: HibernateConfiguration = HibernateConfiguration(NodeSchemaService(), makeTestDatabaseProperties(), { identityService })): VaultService {
-        val vaultService = NodeVaultService(this, dataSourceProps, makeTestDatabaseProperties())
+    fun makeVaultService(dataSourceProps: Properties, hibernateConfig: HibernateConfiguration = HibernateConfiguration(NodeSchemaService(), makeTestDatabaseProperties(), { identityService }), storeIrrelevantStates: Boolean = false): VaultService {
+        val vaultService = NodeVaultService(this, dataSourceProps, makeTestDatabaseProperties(), storeIrrelevantStates)
         hibernatePersister = HibernateObserver(vaultService.rawUpdates, hibernateConfig)
         return vaultService
     }
@@ -219,6 +219,7 @@ fun makeTestIdentityService() = InMemoryIdentityService(MOCK_IDENTITIES, trustRo
 
 fun makeTestDatabaseAndMockServices(customSchemas: Set<MappedSchema> = setOf(CommercialPaperSchemaV1, DummyLinearStateSchemaV1, CashSchemaV1),
                                     keys: List<KeyPair> = listOf(MEGA_CORP_KEY),
+                                    storeIrrelevantStates: Boolean = false,
                                     identitySvc: ()-> IdentityService = { makeTestIdentityService() }): Pair<CordaPersistence, MockServices> {
     val dataSourceProps = makeTestDataSourceProperties()
     val databaseProperties = makeTestDatabaseProperties()
@@ -227,7 +228,7 @@ fun makeTestDatabaseAndMockServices(customSchemas: Set<MappedSchema> = setOf(Com
     val mockService = database.transaction {
         val hibernateConfig = HibernateConfiguration(NodeSchemaService(customSchemas), databaseProperties,  identitySvc = identitySvc)
         object : MockServices(*(keys.toTypedArray())) {
-            override val vaultService: VaultService = makeVaultService(dataSourceProps, hibernateConfig)
+            override val vaultService: VaultService = makeVaultService(dataSourceProps, hibernateConfig, storeIrrelevantStates = storeIrrelevantStates)
 
             override fun recordTransactions(notifyVault: Boolean, txs: Iterable<SignedTransaction>) {
                 for (stx in txs) {

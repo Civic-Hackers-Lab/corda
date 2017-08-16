@@ -35,6 +35,7 @@ interface NodeConfiguration : NodeSSLConfiguration {
     val bftSMaRt: BFTSMaRtConfiguration
     val notaryNodeAddress: NetworkHostAndPort?
     val notaryClusterAddresses: List<NetworkHostAndPort>
+    val storeIrrelevantStates: Boolean
 }
 
 data class FullNodeConfiguration(
@@ -68,6 +69,7 @@ data class FullNodeConfiguration(
         override val notaryClusterAddresses: List<NetworkHostAndPort>,
         override val certificateChainCheckPolicies: List<CertChainPolicyConfig>,
         override val devMode: Boolean = false,
+        override val storeIrrelevantStates: Boolean = false,
         val useTestClock: Boolean = false,
         val detectPublicIp: Boolean = true
 ) : NodeConfiguration {

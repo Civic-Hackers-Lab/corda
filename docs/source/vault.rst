@@ -49,6 +49,8 @@ Note the following:
 * a :doc:`Vault Query API </api-vault-query>` is exposed to developers using standard Corda RPC and CorDapp plugin mechanisms
 * a vault update API is internally used by transaction recording flows.
 * the vault database schemas are directly accessible via JDBC for customer joins and queries
+* the vault will not store irrelevant states by default, this can be configured using ``storeIrrelevantStates`` flag in
+  Corda configuration file. See :doc:`corda-configuration-file` for more information.
 
 Section 8 of the `Technical white paper`_ describes features of the vault yet to be implemented including private key managament, state splitting and merging, asset re-issuance and node event scheduling.
 
