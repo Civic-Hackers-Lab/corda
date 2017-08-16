@@ -144,6 +144,7 @@ class CordaRPCOpsImplTest {
 
         var issueSmId: StateMachineRunId? = null
         var moveSmId: StateMachineRunId? = null
+        var receiveSmId: StateMachineRunId? = null
         stateMachineUpdates.expectEvents {
             sequence(
                     // ISSUE
@@ -156,6 +157,12 @@ class CordaRPCOpsImplTest {
                     // MOVE
                     expect { add: StateMachineUpdate.Added ->
                         moveSmId = add.id
+                    },
+                    expect { add: StateMachineUpdate.Added ->
+                        receiveSmId = add.id
+                    },
+                    expect { remove: StateMachineUpdate.Removed ->
+                        require(remove.id == receiveSmId)
                     },
                     expect { remove: StateMachineUpdate.Removed ->
                         require(remove.id == moveSmId)
