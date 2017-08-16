@@ -17,11 +17,11 @@ object CashPaymentFlow {
     /**
      * Initiates a flow that sends cash to a otherSide.
      *
-     * @param amount the amount of a currency to pay to the otherSide.
+     * @param amount the amount of a currency to pay to the counterparty.
      * @param recipient the party to pay the currency to.
      * @param issuerConstraint if specified, the payment will be made using only cash issued by the given parties.
-     * @param anonymous whether to anonymous the otherSide party. Should be true for normal usage, but may be false
-     * for testing purposes.
+     * @param anonymous whether to anonymise the counterparty's well known identity. Should be true for normal usage,
+     * but may be false for testing purposes.
      */
     @StartableByRPC
     @InitiatingFlow
@@ -78,7 +78,8 @@ object CashPaymentFlow {
         @Suspendable
         override fun call() {
             val proposal = receive<PaymentProposal>(otherSide)
-            // TODO: Provide hooks for KYC/AML verification logic, don't just accept everything
+            // TODO: Provide hooks the recipient to provide their own business logic on what
+            // payments are expected/acceptable.
             send(otherSide, true)
         }
     }
