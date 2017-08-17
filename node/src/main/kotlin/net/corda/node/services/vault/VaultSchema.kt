@@ -25,7 +25,7 @@ object VaultSchema
  */
 @CordaSerializable
 object VaultSchemaV1 : MappedSchema(schemaFamily = VaultSchema.javaClass, version = 1,
-                                    mappedTypes = listOf(VaultStates::class.java, VaultLinearStates::class.java, VaultFungibleStates::class.java,  CommonSchemaV1.Party::class.java)) {
+                                    mappedTypes = listOf(VaultStates::class.java, VaultLinearStates::class.java, VaultFungibleStates::class.java,  VaultTxnNote::class.java, CommonSchemaV1.Party::class.java)) {
     @Entity(name = "VaultStates")
     @Table(name = "vault_states",
             indexes = arrayOf(Index(name = "state_status_idx", columnList = "state_status")))
@@ -128,12 +128,13 @@ object VaultSchemaV1 : MappedSchema(schemaFamily = VaultSchema.javaClass, versio
                      participants =  _participants.map { CommonSchemaV1.Party(it) }.toSet())
     }
 
+    @Entity
     @Table(name = "vault_transaction_notes",
            indexes = arrayOf(Index(name = "seq_no_index", columnList = "seq_no"),
                              Index(name = "transaction_id_index", columnList = "transaction_id")))
     class VaultTxnNote(
         @Id
-        @Generated(value = GenerationTime.INSERT )
+        @GeneratedValue
         @Column(name = "seq_no")
         var seqNo: Int,
 
