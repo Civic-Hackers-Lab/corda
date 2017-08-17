@@ -58,6 +58,7 @@ public class VaultQueryJavaTests extends TestDependencyInjectionBase {
         ArrayList<KeyPair> keys = new ArrayList<>();
         keys.add(getMEGA_CORP_KEY());
         keys.add(getDUMMY_NOTARY_KEY());
+        @SuppressWarnings("unchecked")
         Pair<CordaPersistence, MockServices> databaseAndServices = makeTestDatabaseAndMockServices(Collections.EMPTY_SET, keys);
         issuerServices = new MockServices(getDUMMY_CASH_ISSUER_KEY(), getBOC_KEY());
         database = databaseAndServices.getFirst();
@@ -127,7 +128,7 @@ public class VaultQueryJavaTests extends TestDependencyInjectionBase {
 
             VaultFiller.fillWithSomeTestCash(services,
                                  new Amount<>(100, Currency.getInstance("USD")),
-                    issuerServices,
+                                 issuerServices,
                                  TestConstants.getDUMMY_NOTARY(),
                                 3,
                                 3,
