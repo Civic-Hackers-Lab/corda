@@ -16,6 +16,7 @@ import net.corda.node.services.persistence.DBTransactionStorage
 import net.corda.node.services.transactions.PersistentUniquenessProvider
 import net.corda.node.services.vault.VaultSchemaV1
 import net.corda.schemas.CashSchemaV1
+import net.corda.services.schemas.AttachmentsSchemaV1
 
 /**
  * Most basic implementation of [SchemaService].
@@ -41,9 +42,10 @@ class NodeSchemaService(customSchemas: Set<MappedSchema> = emptySet()) : SchemaS
     // Required schemas are those used by internal Corda services
     // For example, cash is used by the vault for coin selection (but will be extracted as a standalone CorDapp in future)
     val requiredSchemas: Map<MappedSchema, SchemaService.SchemaOptions> =
-            mapOf(Pair(CashSchemaV1, SchemaService.SchemaOptions()),
+            mapOf(Pair(CashSchemaV1, SchemaService.SchemaOptions()),        // TODO remove and configure in finance CorDapp
                   Pair(CommonSchemaV1, SchemaService.SchemaOptions()),
                   Pair(VaultSchemaV1, SchemaService.SchemaOptions()),
+                  Pair(AttachmentsSchemaV1, SchemaService.SchemaOptions()),
                   Pair(NodeServicesV1, SchemaService.SchemaOptions()))
 
 
