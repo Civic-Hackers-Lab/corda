@@ -107,7 +107,7 @@ class InMemoryIdentityServiceTests {
     fun `get anonymous identity by key`() {
         val trustRoot = DUMMY_CA
         val (alice, aliceTxIdentity) = createParty(ALICE.name, trustRoot)
-        val (bob, bobTxIdentity) = createParty(ALICE.name, trustRoot)
+        val (_, bobTxIdentity) = createParty(ALICE.name, trustRoot)
 
         // Now we have identities, construct the service and let it know about both
         val service = InMemoryIdentityService(setOf(alice), emptySet(), trustRoot.certificate.cert)
