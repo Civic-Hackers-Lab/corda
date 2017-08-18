@@ -64,7 +64,8 @@ class CashTests : TestDependencyInjectionBase() {
                     ownedBy = OUR_IDENTITY_1, issuedBy = MINI_CORP.ref(1), issuerServices = miniCorpServices)
             miniCorpServices.fillWithSomeTestCash(howMuch = 80.SWISS_FRANCS, atLeastThisManyStates = 1, atMostThisManyStates = 1,
                     ownedBy = OUR_IDENTITY_1, issuedBy = MINI_CORP.ref(1), issuerServices = miniCorpServices)
-
+        }
+        database.transaction {
             vaultStatesUnconsumed = miniCorpServices.vaultQueryService.queryBy<Cash.State>().states
         }
         resetTestSerialization()
@@ -556,9 +557,11 @@ class CashTests : TestDependencyInjectionBase() {
     @Test
     fun generateSimpleDirectSpend() {
         initialiseTestSerialization()
+        val wtx =
+           database.transaction {
+                makeSpend(100.DOLLARS, THEIR_IDENTITY_1)
+            }
         database.transaction {
-            val wtx = makeSpend(100.DOLLARS, THEIR_IDENTITY_1)
-
             @Suppress("UNCHECKED_CAST")
             val vaultState = vaultStatesUnconsumed.elementAt(0)
             assertEquals(vaultState.ref, wtx.inputs[0])
@@ -582,10 +585,11 @@ class CashTests : TestDependencyInjectionBase() {
     @Test
     fun generateSimpleSpendWithChange() {
         initialiseTestSerialization()
+        val wtx =
+            database.transaction {
+                makeSpend(10.DOLLARS, THEIR_IDENTITY_1)
+            }
         database.transaction {
-
-            val wtx = makeSpend(10.DOLLARS, THEIR_IDENTITY_1)
-
             @Suppress("UNCHECKED_CAST")
             val vaultState = vaultStatesUnconsumed.elementAt(0)
             assertEquals(vaultState.ref, wtx.inputs[0])
@@ -598,9 +602,11 @@ class CashTests : TestDependencyInjectionBase() {
     @Test
     fun generateSpendWithTwoInputs() {
         initialiseTestSerialization()
+        val wtx =
+            database.transaction {
+                makeSpend(500.DOLLARS, THEIR_IDENTITY_1)
+            }
         database.transaction {
-            val wtx = makeSpend(500.DOLLARS, THEIR_IDENTITY_1)
-
             @Suppress("UNCHECKED_CAST")
             val vaultState0 = vaultStatesUnconsumed.elementAt(0)
             val vaultState1 = vaultStatesUnconsumed.elementAt(1)
@@ -614,10 +620,13 @@ class CashTests : TestDependencyInjectionBase() {
     @Test
     fun generateSpendMixedDeposits() {
         initialiseTestSerialization()
+        val wtx =
+            database.transaction {
+                val wtx = makeSpend(580.DOLLARS, THEIR_IDENTITY_1)
+                assertEquals(3, wtx.inputs.size)
+                wtx
+            }
         database.transaction {
-            val wtx = makeSpend(580.DOLLARS, THEIR_IDENTITY_1)
-            assertEquals(3, wtx.inputs.size)
-
             @Suppress("UNCHECKED_CAST")
             val vaultState0 = vaultStatesUnconsumed.elementAt(0)
             val vaultState1 = vaultStatesUnconsumed.elementAt(1)
