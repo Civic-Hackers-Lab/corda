@@ -13,10 +13,10 @@ import net.corda.node.services.keys.PersistentKeyManagementService
 import net.corda.node.services.persistence.DBCheckpointStorage
 import net.corda.node.services.persistence.DBTransactionMappingStorage
 import net.corda.node.services.persistence.DBTransactionStorage
+import net.corda.node.services.persistence.NodeAttachmentService
 import net.corda.node.services.transactions.PersistentUniquenessProvider
 import net.corda.node.services.vault.VaultSchemaV1
 import net.corda.schemas.CashSchemaV1
-import net.corda.services.schemas.AttachmentsSchemaV1
 
 /**
  * Most basic implementation of [SchemaService].
@@ -36,7 +36,8 @@ class NodeSchemaService(customSchemas: Set<MappedSchema> = emptySet()) : SchemaS
                     DBTransactionStorage.DBTransaction::class.java,
                     DBTransactionMappingStorage.DBTransactionMapping::class.java,
                     PersistentKeyManagementService.PersistentKey::class.java,
-                    PersistentUniquenessProvider.PersistentUniqueness::class.java
+                    PersistentUniquenessProvider.PersistentUniqueness::class.java,
+                    NodeAttachmentService.DBAttachment::class.java
                     ))
 
     // Required schemas are those used by internal Corda services
@@ -45,9 +46,7 @@ class NodeSchemaService(customSchemas: Set<MappedSchema> = emptySet()) : SchemaS
             mapOf(Pair(CashSchemaV1, SchemaService.SchemaOptions()),        // TODO remove and configure in finance CorDapp
                   Pair(CommonSchemaV1, SchemaService.SchemaOptions()),
                   Pair(VaultSchemaV1, SchemaService.SchemaOptions()),
-                  Pair(AttachmentsSchemaV1, SchemaService.SchemaOptions()),
                   Pair(NodeServicesV1, SchemaService.SchemaOptions()))
-
 
     override val schemaOptions: Map<MappedSchema, SchemaService.SchemaOptions> = requiredSchemas.plus(customSchemas.map {
         mappedSchema -> Pair(mappedSchema, SchemaService.SchemaOptions())
